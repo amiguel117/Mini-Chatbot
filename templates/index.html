@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mini Chatbot</title>
+    <style>
+        /* --- Basic styling for chatbot --- */
+        body { font-family: Arial; }
+        
+        /* Chat window box */
+        #chatbox {
+            width: 300px; height: 400px; border: 1px solid #ccc;
+            padding: 10px; overflow-y: auto; margin: 20px auto;
+            border-radius: 10px; background: #f9f9f9;
+        }
+
+        /* Bot messages (blue, left-aligned) */
+        .bot { color: blue; margin: 5px 0; }
+
+        /* User messages (green, right-aligned) */
+        .user { color: green; text-align: right; margin: 5px 0; }
+
+        /* Input and button */
+        #inputBox { width: 80%; padding: 5px; }
+        #sendBtn { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- Title above chatbot -->
+    <h2 style="text-align:center;">🤖 Red - Chatbot</h2>
+
+    <!-- Chat window where messages will appear -->
+    <div id="chatbox">
+        <!-- Initial messages from bot -->
+        <div class="bot">Hi! I'm Red - Your shopping assistant chatbot!</div>
+        <div class="bot">How can I help? (1–5)</div>
+    </div>
+
+    <!-- Input area -->
+    <div style="text-align:center; margin-top:10px;">
+        <!-- User types a message here -->
+        <input id="inputBox" type="text" placeholder="Type option (1-5)">
+        <!-- Button to send message -->
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <script>
+        // --- JavaScript handles the chat logic ---
+
+        // Get references to chat elements
+        const chatbox = document.getElementById("chatbox");
+        const inputBox = document.getElementById("inputBox");
+        const sendBtn = document.getElementById("sendBtn");
+
+        // Function to add a new message to the chatbox
+        function addMessage(sender, text) {
+            const msg = document.createElement("div"); // create new <div>
+            msg.className = sender; // either "bot" or "user"
+            msg.innerHTML = text;   // set text inside
+            chatbox.appendChild(msg); // add to chat window
+            chatbox.scrollTop = chatbox.scrollHeight; // auto-scroll to bottom
+        }
+
+        // When "Send" button is clicked
+        sendBtn.onclick = () => {
+            const userMsg = inputBox.value.trim(); // get input text
+            if (userMsg) {
+                // Show user message in chatbox
+                addMessage("user", userMsg);
+
+                // Send user message to backend (/chat route in app.py)
+                fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userMsg }) // send as JSON
+                })
+                // Parse the JSON reply from backend
+                .then(res => res.json())
+                .then(data => {
+                    // Show bot's reply in chatbox
+                    addMessage("bot", data.reply);
+                });
+
+                // Clear input box
+                inputBox.value = "";
+            }
+        };
+    </script>
+</body>
+</html>
